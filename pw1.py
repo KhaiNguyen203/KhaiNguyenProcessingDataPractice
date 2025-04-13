@@ -24,10 +24,9 @@ df = df.sort_values(by="date")
 # set index là ngày ở đây để có thể slice mẫu dữ liệu theo ngày
 df = df.set_index('date')
 
-
-
 #tính trung bình dữ liệu của các giờ trong ngày
 df_day = df.groupby('date')[['Basel Temperature', 'Basel Precipitation Total']].mean()
+
 #Xóa các ô dữ liệu trống
 df_day = df_day[['Basel Temperature', 'Basel Precipitation Total']].dropna()
 
@@ -48,26 +47,23 @@ temp_2015to2024 = []
 for i in range(2015, 2025):
     temp = df_april[df_april['date'].dt.year == i]
     temp_2015to2024.append(temp['Basel Temperature'])
-'''
-# Chuẩn hóa lại list thành array
-training_data = np.array(temp_2014to2023)
-lable_data = np.array(temp_2015to2024)
-'''
-# Chuyển temp_2014to2023 thành mảng 2D (số năm, số ngày)
-training_data = np.array([np.array(temp) for temp in temp_2014to2023])  # shape (10, 30)
 
-# Chuyển temp_2015to2024 thành mảng 1D (số ngày trong tháng 4 của năm 2024)
-lable_data = np.array(temp_2015to2024)
+#chuẩn hóa để phù hợp với phương thức fit
+## Chuyển temp_2014to2023 thành mảng 2D (số năm, số ngày)
+training_data = np.array([np.array(temp) for temp in temp_2014to2023])  # shape (10, 30)
+## Chuyển temp_2015to2024 thành mảng 1D (số ngày trong tháng 4 của năm 2024)
+label_data = np.array(temp_2015to2024)
 
 '''
 print("Training data shape:", training_data.shape)
-print("Label data shape:", lable_data.shape)
-print(lable_data)
+print("Label data shape:", label_data.shape)
+print(label_data)
 '''
 
 #tạo mô hình dự đoán
 PModel = LinearRegression()
-PModel.fit(training_data,lable_data)
+PModel.fit(training_data,label_data)
+
 #! Phương thức values sẽ chuyển từ Series của pandas về array của numpy giúp chúng hoạt động được trong phương thức predict của scikitlearn
 Temp_April_2024 = df_april[df_april['date'].dt.year == 2024]['Basel Temperature'].values
 
@@ -78,18 +74,29 @@ Temp_April_2024 = df_april[df_april['date'].dt.year == 2024]['Basel Temperature'
 Temp_April_2024_reshape = Temp_April_2024.reshape(1, 30)
 
 predicted_2025 = PModel.predict(Temp_April_2024_reshape)
-print(predicted_2025)
 
-#vẽ biểu đổ 
+# chuyển narray của predict_2025 thành data frame và thêm vào ngày giờ
+dates_April_2025 = pd.date_range(start='2025-04-01', end='2025-04-30')
+## chuyển predicted_2025 thành mảng 1D để không bị lỗi
+predicted_2025 = predicted_2025.flatten()
+## tạo ra hai cột thuộc data frame là date và predicted_temp
+df_predicted_2025 = pd.DataFrame({'date': dates_April_2025, 'predicted_temp': predicted_2025})
+
+# vẽ biểu đổ 
+plt.title('Temperature & Precipitation of Basel in April (2014 - 2025)')
 ## Chuyển 'date' từ index thành cột
-df_day = df_day.reset_index()
-ax = df_day.plot(kind='scatter', x="date", y='Basel Temperature')
+df_train = df_train.reset_index()
+
+ax = df_train.plot(kind='scatter', x="date", y='Basel Temperature', color='#0077ff', label = 'Mesured temperature')
+df_predicted_2025.plot(kind='scatter', x="date", y='predicted_temp', ax = ax, color='orange', label='Predicted temperature')
 
 ## điều chỉnh độ chia nhỏ nhất của trục y và trục x
 ax.xaxis.set_major_locator(mdates.YearLocator(1))
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
 ax.yaxis.set_major_locator(ticker.MultipleLocator(1))  # mỗi 1 độ
 
-plt.title('Temperature & Precipitation of Basel in April (2014 - 2025)')
 
-#*plt.show()
+
+plt.show()
+
+#* print(df_train)
