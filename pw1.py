@@ -44,31 +44,40 @@ ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
 ax.yaxis.set_major_locator(ticker.MultipleLocator(1))  # mỗi 1 độ
 
 plt.title('Temperature & Precipitation of Basel in April (2014 - 2025)')
-## 
 
 #*plt.show()
 #*print (df_train[['date', 'Basel Temperature', 'Basel Precipitation Total']])
 
-#rút trích dữ liệu từ tháng 4 của từng năm
+#rút trích dữ liệu từ tháng 4 của các năm trước 2024
 df_train = df_train.reset_index()
+df_test = df_test.reset_index()
 df_april = df_train[df_train['date'].dt.month == 4]
-temp_past_years = [[]]
+temp_past_years = []
 for i in range(2014, 2024):
     temp = df_april[df_april['date'].dt.year == i]
     temp_past_years.append(temp['Basel Temperature'])
+
 #rút trích dữ liệu tháng 4 của năm 2024 để dán nhãn ở phía dưới
 temp_in_2024 = []
 temp_2024 = df_april[df_april['date'].dt.year == 2024]
 temp_in_2024.append(temp_2024['Basel Temperature'])
-
+'''
+# Chuẩn hóa lại list thành array
 training_data = np.array(temp_past_years)
 lable_data = np.array(temp_in_2024)
+'''
+# Chuyển temp_past_years thành mảng 2D (số năm, số ngày)
+training_data = np.array([np.array(temp) for temp in temp_past_years])  # shape (10, 30)
 
-print (training_data.shape)
-print (lable_data.shape)
+# Chuyển temp_in_2024 thành mảng 1D (số ngày trong tháng 4 của năm 2024)
+lable_data = np.array(temp_in_2024).flatten()
+
+print("Training data shape:", training_data.shape)  # Kỳ vọng (10, 30)
+print("Label data shape:", lable_data.shape)  # Kỳ vọng (30,)
+print(lable_data)
 '''
 #tạo mô hình dự đoán
 predictionModel = LinearRegression()
 predictionModel.fit(training_data,lable_data)
-#*print (lable_data)
 '''
+#*print (lable_data)
