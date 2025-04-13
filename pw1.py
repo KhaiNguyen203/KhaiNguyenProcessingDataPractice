@@ -50,36 +50,36 @@ plt.title('Temperature & Precipitation of Basel in April (2014 - 2025)')
 #*plt.show()
 #*print (df_train[['date', 'Basel Temperature', 'Basel Precipitation Total']])
 
-#rút trích dữ liệu từ tháng 4 của các năm trước 2024
+#rút trích dữ liệu từ tháng 4 của các năm 2014-2023
 df_train = df_train.reset_index()
-df_test = df_test.reset_index()
 df_april = df_train[df_train['date'].dt.month == 4]
-temp_past_years = []
+temp_2014to2023 = []
 for i in range(2014, 2024):
     temp = df_april[df_april['date'].dt.year == i]
-    temp_past_years.append(temp['Basel Temperature'])
+    temp_2014to2023.append(temp['Basel Temperature'])
 
-#rút trích dữ liệu tháng 4 của năm 2024 để dán nhãn ở phía dưới
-temp_in_2024 = []
-temp_2024 = df_april[df_april['date'].dt.year == 2024]
-temp_in_2024.append(temp_2024['Basel Temperature'])
+#rút trích dữ liệu từ tháng 4 của các năm 2015-2024 để dán nhãn
+temp_2015to2024 = []
+for i in range(2015, 2025):
+    temp = df_april[df_april['date'].dt.year == i]
+    temp_2015to2024.append(temp['Basel Temperature'])
 '''
 # Chuẩn hóa lại list thành array
-training_data = np.array(temp_past_years)
-lable_data = np.array(temp_in_2024)
+training_data = np.array(temp_2014to2023)
+lable_data = np.array(temp_2015to2024)
 '''
-# Chuyển temp_past_years thành mảng 2D (số năm, số ngày)
-training_data = np.array([np.array(temp) for temp in temp_past_years])  # shape (10, 30)
+# Chuyển temp_2014to2023 thành mảng 2D (số năm, số ngày)
+training_data = np.array([np.array(temp) for temp in temp_2014to2023])  # shape (10, 30)
 
-# Chuyển temp_in_2024 thành mảng 1D (số ngày trong tháng 4 của năm 2024)
-lable_data = np.array(temp_in_2024).flatten()
+# Chuyển temp_2015to2024 thành mảng 1D (số ngày trong tháng 4 của năm 2024)
+lable_data = np.array(temp_2015to2024)
 
 print("Training data shape:", training_data.shape)
 print("Label data shape:", lable_data.shape)
-print(df_train)
-'''
+print(lable_data)
+
 #tạo mô hình dự đoán
 predictionModel = LinearRegression()
 predictionModel.fit(training_data,lable_data)
-'''
+
 #*print (lable_data)
