@@ -52,7 +52,7 @@ plt.title('Temperature & Precipitation of Basel in April (2014 - 2025)')
 #rút trích dữ liệu từ tháng 4 của từng năm
 df_train = df_train.reset_index()
 df_april = df_train[df_train['date'].dt.month == 4]
-temp_past_years = []
+temp_past_years = [[]]
 for i in range(2014, 2024):
     temp = df_april[df_april['date'].dt.year == i]
     temp_past_years.append(temp['Basel Temperature'])
@@ -61,16 +61,14 @@ temp_in_2024 = []
 temp_2024 = df_april[df_april['date'].dt.year == 2024]
 temp_in_2024.append(temp_2024['Basel Temperature'])
 
-#dữ liệu cho máy học
-training_data = [[]]
-for i in range (len(temp_past_years)):
-    training_data.append(temp_past_years[i])
+training_data = np.array(temp_past_years)
+lable_data = np.array(temp_in_2024)
 
-# dữ liệu gán nhãn
-lable_data = []
-lable_data.append(temp_in_2024)
-
+print (training_data.shape)
+print (lable_data.shape)
+'''
 #tạo mô hình dự đoán
 predictionModel = LinearRegression()
 predictionModel.fit(training_data,lable_data)
 #*print (lable_data)
+'''
