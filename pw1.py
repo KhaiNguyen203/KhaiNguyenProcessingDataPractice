@@ -24,14 +24,16 @@ df = df.sort_values(by="date")
 # set index là ngày ở đây để có thể slice mẫu dữ liệu theo ngày
 df = df.set_index('date')
 
-# chia dữ liệu thành 2 phần để train và để test
-df_train = df[:'2024-12-31']
-df_test = df['2025-01-01':]
+
 
 #tính trung bình dữ liệu của các giờ trong ngày
-df_day = df_train.groupby('date')[['Basel Temperature', 'Basel Precipitation Total']].mean()
+df_day = df.groupby('date')[['Basel Temperature', 'Basel Precipitation Total']].mean()
 #Xóa các ô dữ liệu trống
 df_day = df_day[['Basel Temperature', 'Basel Precipitation Total']].dropna()
+
+# chia dữ liệu thành 2 phần để train và để test
+df_train = df_day[:'2024-12-31']
+df_test = df_day['2025-01-01':]
 
 ##vẽ biểu đổ 
 # Chuyển 'date' từ index thành cột
@@ -72,9 +74,9 @@ training_data = np.array([np.array(temp) for temp in temp_past_years])  # shape 
 # Chuyển temp_in_2024 thành mảng 1D (số ngày trong tháng 4 của năm 2024)
 lable_data = np.array(temp_in_2024).flatten()
 
-print("Training data shape:", training_data.shape)  # Kỳ vọng (10, 30)
-print("Label data shape:", lable_data.shape)  # Kỳ vọng (30,)
-print(lable_data)
+print("Training data shape:", training_data.shape)
+print("Label data shape:", lable_data.shape)
+print(df_train)
 '''
 #tạo mô hình dự đoán
 predictionModel = LinearRegression()
