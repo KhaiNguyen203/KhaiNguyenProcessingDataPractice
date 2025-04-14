@@ -8,15 +8,12 @@ import matplotlib.dates as mdates
 
 from sklearn.linear_model import LinearRegression
 
-BaTemp = 'Basel Temperature'
-BaPrec = 'Basel Precipitation Total'
-
-df = pd.read_csv('2014-2025_WeatherForecastDataInBasel.csv')
+df = pd.read_csv('2014-2025_WeatherForecastDataInBasel.csv') 
 
 # chuyển dạng timestamp sang dạng yyyy-mm-dd
 df['timestamp'] = pd.to_datetime(df['timestamp'], format='%Y%m%dT%H%M')
 
-#Gộp phần giờ của mẫu số liệu chỉ lấy theo ngày
+# gộp phần giờ của mẫu số liệu chỉ lấy theo ngày
 df['date'] = pd.to_datetime(df['timestamp'].dt.date) # hoặc .dt.to_period('D') cũng được
 
 df = df.sort_values(by="date")
@@ -24,17 +21,17 @@ df = df.sort_values(by="date")
 # set index là ngày ở đây để có thể slice mẫu dữ liệu theo ngày
 df = df.set_index('date')
 
-#tính trung bình dữ liệu của các giờ trong ngày
+# tính trung bình dữ liệu của các giờ trong ngày
 df_day = df.groupby('date')[['Basel Temperature', 'Basel Precipitation Total']].mean()
 
-#Xóa các ô dữ liệu trống
+# Xóa các ô dữ liệu trống
 df_day = df_day[['Basel Temperature', 'Basel Precipitation Total']].dropna()
 
 # chia dữ liệu thành 2 phần để train và để test
 df_train = df_day[:'2024-12-31']
 df_test = df_day['2025-01-01':]
 
-#rút trích dữ liệu từ tháng 4 của các năm 2014-2023
+# rút trích dữ liệu từ tháng 4 của các năm 2014-2023
 df_train = df_train.reset_index()
 df_april = df_train[df_train['date'].dt.month == 4]
 temp_2014to2023 = []
@@ -42,16 +39,16 @@ for i in range(2014, 2024):
     temp = df_april[df_april['date'].dt.year == i]
     temp_2014to2023.append(temp['Basel Temperature'])
 
-#rút trích dữ liệu từ tháng 4 của các năm 2015-2024 để dán nhãn
+# rút trích dữ liệu từ tháng 4 của các năm 2015-2024 để dán nhãn
 temp_2015to2024 = []
 for i in range(2015, 2025):
     temp = df_april[df_april['date'].dt.year == i]
     temp_2015to2024.append(temp['Basel Temperature'])
 
-#chuẩn hóa để phù hợp với phương thức fit
-## Chuyển temp_2014to2023 thành mảng 2D (số năm, số ngày)
+# chuẩn hóa để phù hợp với phương thức fit
+## chuyển temp_2014to2023 thành mảng 2D (số năm, số ngày)
 training_data = np.array([np.array(temp) for temp in temp_2014to2023])  # shape (10, 30)
-## Chuyển temp_2015to2024 thành mảng 1D (số ngày trong tháng 4 của năm 2024)
+## chuyển temp_2015to2024 thành mảng 1D (số ngày trong tháng 4 của năm 2024)
 label_data = np.array(temp_2015to2024)
 
 '''
@@ -62,7 +59,7 @@ print(label_data)
 
 #tạo mô hình dự đoán
 PModel = LinearRegression()
-PModel.fit(training_data,label_data)
+PModel.fit(training_data, label_data)
 
 #! Phương thức values sẽ chuyển từ Series của pandas về array của numpy giúp chúng hoạt động được trong phương thức predict của scikitlearn
 Temp_April_2024 = df_april[df_april['date'].dt.year == 2024]['Basel Temperature'].values
@@ -83,20 +80,22 @@ predicted_2025 = predicted_2025.flatten()
 df_predicted_2025 = pd.DataFrame({'date': dates_April_2025, 'predicted_temp': predicted_2025})
 
 # vẽ biểu đổ 
-plt.title('Temperature & Precipitation of Basel in April (2014 - 2025)')
 ## Chuyển 'date' từ index thành cột
-df_train = df_train.reset_index()
+df_day = df_day.reset_index()
 
-ax = df_train.plot(kind='scatter', x="date", y='Basel Temperature', color='#0077ff', label = 'Mesured temperature')
+ax = df_day.plot(kind='scatter', x="date", y='Basel Temperature', color='#0077ff', label = 'Mesured temperature')
 df_predicted_2025.plot(kind='scatter', x="date", y='predicted_temp', ax = ax, color='orange', label='Predicted temperature')
 
 ## điều chỉnh độ chia nhỏ nhất của trục y và trục x
-ax.xaxis.set_major_locator(mdates.YearLocator(1))
-ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
-ax.yaxis.set_major_locator(ticker.MultipleLocator(1))  # mỗi 1 độ
+#ax.xaxis.set_major_locator(mdates.YearLocator(1))
+#ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+#ax.yaxis.set_major_locator(ticker.MultipleLocator(1))  # mỗi 1 độ
 
+##hiển thị biểu đồ
+plt.title('Temperature & Precipitation of Basel in April (2014 - 2025)')
+#*plt.show()
+#*df_test = df_test.reset_index()
+#*print(df_test['date'])
+#*print(df_test[df_test['date'].dt.month == 4]['Basel Temperature'])
 
-
-plt.show()
-
-#* print(df_train)
+print(df_april)
