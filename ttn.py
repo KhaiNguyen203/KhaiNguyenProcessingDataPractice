@@ -31,3 +31,6 @@ df_label = df_label.reshape(1, 891)
 
 model = LinearRegression()
 model.fit(df_train, df_label)
+###
+###
+###
